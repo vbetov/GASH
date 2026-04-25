@@ -46,4 +46,7 @@ interface ProgressDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertProgressIfNotExists(progress: ProgressEntity)
+
+    @Query("DELETE FROM progress WHERE word_id = :wordId")
+    suspend fun deleteProgress(wordId: Int)
 }

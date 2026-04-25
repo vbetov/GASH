@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
@@ -60,6 +61,20 @@ fun ReviewScreen(vm: ReviewViewModel = viewModel()) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Undo back button
+        if (state.canUndo) {
+            IconButton(
+                onClick = { vm.undo() },
+                modifier = Modifier.align(Alignment.Start)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Undo",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
         // Progress indicator
         Text(
             text = "${state.queueIndex + 1} / ${state.queue.size}" +

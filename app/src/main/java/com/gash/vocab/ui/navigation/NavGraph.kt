@@ -66,7 +66,10 @@ fun GashNavGraph(
             }
         }
         composable(Routes.STATS) {
-            StatsScreen(onDismiss = null)
+            StatsScreen(
+                onDismiss = null,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

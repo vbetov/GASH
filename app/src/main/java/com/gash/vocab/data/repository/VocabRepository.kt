@@ -103,6 +103,15 @@ class VocabRepository(private val db: AppDatabase) {
         }
     }
 
+    /** Restore a previous progress state, or delete the entry if it was null (word was new). */
+    suspend fun restoreProgress(wordId: Int, previous: ProgressEntity?) {
+        if (previous == null) {
+            progressDao.deleteProgress(wordId)
+        } else {
+            progressDao.insertProgress(previous) // REPLACE strategy overwrites
+        }
+    }
+
     // ── Progress export/import ────────────────────────────────────
 
     suspend fun exportProgress(context: Context, uri: Uri): Result<Int> {

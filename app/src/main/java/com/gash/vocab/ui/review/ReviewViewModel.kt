@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.gash.vocab.GashApp
+import com.gash.vocab.data.db.ProgressEntity
 import com.gash.vocab.data.db.WordEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,9 +14,16 @@ import kotlinx.coroutines.launch
 
 enum class ReviewMode { START_PAGE, FRONT, CHECK, CLOZE, CHOICE, EXPLORE, RESULT }
 
+/** Snapshot for undo: the UI state before the action plus the DB progress state. */
+private data class UndoSnapshot(
+    val uiState: ReviewUiState,
+    val progressSnapshot: ProgressEntity?
+)
+
 data class ReviewUiState(
     val currentWord: WordEntity? = null,
     val mode: ReviewMode = ReviewMode.START_PAGE,
+    val canUndo: Boolean = false,
     val queue: List<Int> = emptyList(),
     val queueIndex: Int = 0,
     val choiceOptions: List<String> = emptyList(),
@@ -38,6 +46,30 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _state = MutableStateFlow(ReviewUiState())
     val state: StateFlow<ReviewUiState> = _state.asStateFlow()
+
+    /** Single-level undo snapshot. */
+    private var undoSnapshot: UndoSnapshot? = null
+
+    /** Save current state + DB progress before recording a review. */
+    private suspend fun saveUndoSnapshot() {
+        val s = _state.value
+        val wordId = s.currentWord?.id ?: return
+        val progress = repo.getProgress(wordId)
+        undoSnapshot = UndoSnapshot(uiState = s, progressSnapshot = progress)
+    }
+
+    /** Undo the last review action — restore UI state and DB progress. */
+    fun undo() {
+        val snapshot = undoSnapshot ?: return
+        viewModelScope.launch {
+            repo.restoreProgress(
+                snapshot.uiState.currentWord!!.id,
+                snapshot.progressSnapshot
+            )
+            _state.value = snapshot.uiState.copy(canUndo = false)
+            undoSnapshot = null
+        }
+    }
 
     /** True when a review session is actively in progress (not on start page or complete). */
     val isReviewActive: Boolean
@@ -168,6 +200,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun doDontKnow() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "dk", false)
             advance()
         }
@@ -177,6 +210,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun confirmCheck() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "check", true)
             advance()
         }
@@ -186,6 +220,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun failCheck() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "dk", false)
             advance()
         }
@@ -200,6 +235,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun confirmCloze() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "cloze", true)
             advance()
         }
@@ -209,6 +245,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun failCloze() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "dk", false)
             advance()
         }
@@ -223,6 +260,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             isCorrect = correct
         )
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "choice", correct)
         }
     }
@@ -241,6 +279,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun failAndExplore() {
         val word = _state.value.currentWord ?: return
         viewModelScope.launch {
+            saveUndoSnapshot()
             repo.recordReview(word.id, "dk", false)
         }
         _state.value = _state.value.copy(mode = ReviewMode.EXPLORE)
@@ -250,9 +289,9 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
         val s = _state.value
         val nextIndex = s.queueIndex + 1
         if (nextIndex >= s.queue.size) {
-            _state.value = s.copy(sessionComplete = true)
+            _state.value = s.copy(sessionComplete = true, canUndo = true)
         } else {
-            _state.value = s.copy(queueIndex = nextIndex)
+            _state.value = s.copy(queueIndex = nextIndex, canUndo = true)
             loadWord(s.queue[nextIndex])
         }
     }

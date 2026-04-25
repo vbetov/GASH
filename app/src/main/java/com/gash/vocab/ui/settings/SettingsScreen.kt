@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm: SettingsViewModel = viewModel()) {
@@ -77,7 +79,7 @@ fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm
             confirmButton = {
                 TextButton(onClick = {
                     showExportFirstDialog = false
-                    progressExportLauncher.launch("gash_progress_backup.json")
+                    progressExportLauncher.launch("gash_progress_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm"))}.json")
                     // After export, user will need to tap Import Database again
                 }) {
                     Text("Yes, export first")
@@ -148,7 +150,7 @@ fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm
             ) {
                 OutlinedButton(
                     onClick = {
-                        progressExportLauncher.launch("gash_progress_backup.json")
+                        progressExportLauncher.launch("gash_progress_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm"))}.json")
                     },
                     enabled = !state.isExporting,
                     modifier = Modifier.weight(1f)
@@ -358,16 +360,6 @@ fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm
                 Spacer(Modifier.width(4.dp))
                 Text("Reset to Defaults")
             }
-        }
-
-        // ── Database ──────────────────────────────────────────
-
-        SettingsCard("Database") {
-            Text(
-                text = "Total words: ${state.totalWords}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
 
         Spacer(Modifier.height(16.dp))
