@@ -24,8 +24,7 @@ data class ReviewUiState(
     val choiceAnswer: String? = null,
     val isCorrect: Boolean? = null,
     val sessionComplete: Boolean = false,
-    val newPerDay: Int = 10,
-    val reviewsPerDay: Int = 50,
+    val noCardsDue: Boolean = false,
     val allWeeks: List<String> = emptyList(),
     val allPos: List<String> = emptyList(),
     val selectedWeek: String? = null,
@@ -35,6 +34,7 @@ data class ReviewUiState(
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as GashApp).repository
+    private val settings = (application as GashApp).settings
 
     private val _state = MutableStateFlow(ReviewUiState())
     val state: StateFlow<ReviewUiState> = _state.asStateFlow()
@@ -59,6 +59,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                 allWeeks = weeks,
                 allPos = pos,
                 sessionComplete = false,
+                noCardsDue = false,
                 selectedWeek = null,
                 selectedPos = null
             )
@@ -68,14 +69,22 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     fun startSession() {
         viewModelScope.launch {
             val s = _state.value
-            val queue = repo.getReviewQueue(s.newPerDay, s.reviewsPerDay)
+            // Read live settings values each time a session starts
+            val newPerDay = settings.newPerDay
+            val reviewsPerDay = settings.reviewsPerDay
+            val queue = repo.getReviewQueue(newPerDay, reviewsPerDay)
             if (queue.isEmpty()) {
-                _state.value = s.copy(sessionComplete = true, queue = emptyList())
+                _state.value = s.copy(
+                    mode = ReviewMode.START_PAGE,
+                    sessionComplete = false,
+                    noCardsDue = true,
+                    queue = emptyList()
+                )
                 return@launch
             }
             _state.value = s.copy(
                 queue = queue, queueIndex = 0,
-                sessionComplete = false, selectedWeek = null
+                sessionComplete = false, noCardsDue = false, selectedWeek = null
             )
             loadWord(queue[0])
         }

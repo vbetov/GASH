@@ -35,6 +35,7 @@ fun ReviewScreen(vm: ReviewViewModel = viewModel()) {
         StartPage(
             weeks = state.allWeeks,
             posValues = state.allPos,
+            noCardsDue = state.noCardsDue,
             onStartAll = { vm.startSession() },
             onStartWeek = { vm.startWeekSession(it) },
             onStartPos = { vm.startPosSession(it) }
@@ -554,6 +555,7 @@ private fun SectionHeader(title: String) {
 private fun StartPage(
     weeks: List<String>,
     posValues: List<String>,
+    noCardsDue: Boolean = false,
     onStartAll: () -> Unit,
     onStartWeek: (String) -> Unit,
     onStartPos: (String) -> Unit
@@ -609,6 +611,16 @@ private fun StartPage(
                     color = cardContentColor.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center
                 )
+
+                if (noCardsDue) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "No cards due right now — check back later or adjust your daily limits in Settings.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
                 Spacer(Modifier.height(12.dp))
 
