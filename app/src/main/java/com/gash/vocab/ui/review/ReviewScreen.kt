@@ -188,13 +188,13 @@ private fun FrontCard(
         ) {
             Icon(Icons.Default.Explore, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Explore")
+            Text("Don't Know — Explore")
         }
 
-        TextButton(
+        OutlinedButton(
             onClick = onDontKnow,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )
         ) {
@@ -270,13 +270,13 @@ private fun CheckCard(
 
     Spacer(Modifier.height(8.dp))
 
-    TextButton(
+    OutlinedButton(
         onClick = onFailAndExplore,
         modifier = Modifier.fillMaxWidth()
     ) {
         Icon(Icons.Default.Explore, contentDescription = null)
         Spacer(Modifier.width(4.dp))
-        Text("I Don't Know — Explore")
+        Text("Didn't Know — Explore Further")
     }
 }
 
@@ -369,13 +369,13 @@ private fun ClozeCard(
 
                 Spacer(Modifier.height(8.dp))
 
-                TextButton(
+                OutlinedButton(
                     onClick = onFailAndExplore,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Explore, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
-                    Text("I Don't Know — Explore")
+                    Text("Didn't Know — Explore Further")
                 }
             }
         }
@@ -472,13 +472,13 @@ private fun ChoiceCard(
         if (isCorrect == false) {
             Spacer(Modifier.height(8.dp))
 
-            TextButton(
+            OutlinedButton(
                 onClick = onExplore,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Explore, contentDescription = null)
                 Spacer(Modifier.width(4.dp))
-                Text("Explore")
+                Text("Explore Further")
             }
         }
     }
