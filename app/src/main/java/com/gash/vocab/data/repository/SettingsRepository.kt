@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.time.LocalDate
 
 /**
  * Persists user settings to SharedPreferences.
@@ -23,6 +24,27 @@ class SettingsRepository(context: Context) {
     var reviewsPerDay: Int
         get() = prefs.getInt("reviews_per_day", 50)
         set(value) = prefs.edit().putInt("reviews_per_day", value).apply()
+
+    /** Date (ISO format) when uncap was activated. Empty/null means not active. */
+    private var uncapDate: String?
+        get() = prefs.getString("uncap_date", null)
+        set(value) = prefs.edit().putString("uncap_date", value).apply()
+
+    /** Returns true if new cards are uncapped for today. */
+    val isUncappedToday: Boolean
+        get() = uncapDate == LocalDate.now().toString()
+
+    /** Effective new-per-day limit: uncapped (9999) if today is uncap day, else normal setting. */
+    val effectiveNewPerDay: Int
+        get() = if (isUncappedToday) 9999 else newPerDay
+
+    fun uncapForToday() {
+        uncapDate = LocalDate.now().toString()
+    }
+
+    fun removeUncap() {
+        uncapDate = null
+    }
 
     // ── Review settings ───────────────────────────────────────────
 

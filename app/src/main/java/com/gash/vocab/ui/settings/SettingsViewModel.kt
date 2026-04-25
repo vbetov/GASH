@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 data class SettingsUiState(
     val newPerDay: Int = 10,
     val reviewsPerDay: Int = 50,
+    val isUncappedToday: Boolean = false,
     val learningSteps: String = "1,10",
     val graduatingInterval: Int = 1,
     val easyInterval: Int = 4,
@@ -45,6 +46,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _state.value = SettingsUiState(
                 newPerDay = settings.newPerDay,
                 reviewsPerDay = settings.reviewsPerDay,
+                isUncappedToday = settings.isUncappedToday,
                 learningSteps = settings.learningSteps,
                 graduatingInterval = settings.graduatingInterval,
                 easyInterval = settings.easyInterval,
@@ -64,6 +66,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setReviewsPerDay(value: Int) {
         settings.reviewsPerDay = value
         _state.value = _state.value.copy(reviewsPerDay = value)
+    }
+
+    fun toggleUncapToday() {
+        if (settings.isUncappedToday) {
+            settings.removeUncap()
+        } else {
+            settings.uncapForToday()
+        }
+        _state.value = _state.value.copy(isUncappedToday = settings.isUncappedToday)
     }
 
     // ── Review settings ───────────────────────────────────────────

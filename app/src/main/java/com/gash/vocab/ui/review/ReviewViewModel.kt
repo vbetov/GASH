@@ -70,7 +70,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             val s = _state.value
             // Read live settings values each time a session starts
-            val newPerDay = settings.newPerDay
+            val newPerDay = settings.effectiveNewPerDay
             val reviewsPerDay = settings.reviewsPerDay
             val queue = repo.getReviewQueue(newPerDay, reviewsPerDay)
             if (queue.isEmpty()) {
@@ -235,6 +235,15 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     /** Explore — just move on (no score impact) */
     fun advanceFromExplore() {
         viewModelScope.launch { advance() }
+    }
+
+    /** Record "didn't know" and go to Explore (Next on Explore won't record again) */
+    fun failAndExplore() {
+        val word = _state.value.currentWord ?: return
+        viewModelScope.launch {
+            repo.recordReview(word.id, "dk", false)
+        }
+        _state.value = _state.value.copy(mode = ReviewMode.EXPLORE)
     }
 
     private suspend fun advance() {

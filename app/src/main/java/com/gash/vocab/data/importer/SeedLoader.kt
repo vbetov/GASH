@@ -16,10 +16,15 @@ object SeedLoader {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean(KEY_SEEDED, false)) return
 
+        // Prefer full vocab list; fall back to GitHub shortlist
         val jsonText = try {
             context.assets.open("seed_vocab.json").bufferedReader().readText()
-        } catch (e: Exception) {
-            return // No seed file — skip silently
+        } catch (_: Exception) {
+            try {
+                context.assets.open("seed_vocab_github.json").bufferedReader().readText()
+            } catch (_: Exception) {
+                return // No seed file — skip silently
+            }
         }
 
         val importer = VocabImporter(db.wordDao())

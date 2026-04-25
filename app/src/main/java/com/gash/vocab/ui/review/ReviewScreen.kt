@@ -89,7 +89,8 @@ fun ReviewScreen(vm: ReviewViewModel = viewModel()) {
                 english = word.english,
                 example = word.example,
                 onKnew = { vm.confirmCheck() },
-                onDidntKnow = { vm.failCheck() }
+                onDidntKnow = { vm.failCheck() },
+                onFailAndExplore = { vm.failAndExplore() }
             )
 
             ReviewMode.CLOZE -> ClozeCard(
@@ -99,7 +100,8 @@ fun ReviewScreen(vm: ReviewViewModel = viewModel()) {
                 revealed = state.clozeRevealed,
                 onReveal = { vm.revealCloze() },
                 onKnew = { vm.confirmCloze() },
-                onDidntKnow = { vm.failCloze() }
+                onDidntKnow = { vm.failCloze() },
+                onFailAndExplore = { vm.failAndExplore() }
             )
 
             ReviewMode.CHOICE -> ChoiceCard(
@@ -109,7 +111,8 @@ fun ReviewScreen(vm: ReviewViewModel = viewModel()) {
                 selectedAnswer = state.choiceAnswer,
                 isCorrect = state.isCorrect,
                 onSelect = { vm.selectChoice(it) },
-                onNext = { vm.advanceFromChoice() }
+                onNext = { vm.advanceFromChoice() },
+                onExplore = { vm.doExplore() }
             )
 
             ReviewMode.EXPLORE -> ExploreCard(
@@ -206,7 +209,8 @@ private fun CheckCard(
     english: String,
     example: String,
     onKnew: () -> Unit,
-    onDidntKnow: () -> Unit
+    onDidntKnow: () -> Unit,
+    onFailAndExplore: () -> Unit
 ) {
     Text(
         text = french,
@@ -263,6 +267,17 @@ private fun CheckCard(
             Text("I Knew It")
         }
     }
+
+    Spacer(Modifier.height(8.dp))
+
+    TextButton(
+        onClick = onFailAndExplore,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(Icons.Default.Explore, contentDescription = null)
+        Spacer(Modifier.width(4.dp))
+        Text("I Don't Know — Explore")
+    }
 }
 
 @Composable
@@ -273,7 +288,8 @@ private fun ClozeCard(
     revealed: Boolean,
     onReveal: () -> Unit,
     onKnew: () -> Unit,
-    onDidntKnow: () -> Unit
+    onDidntKnow: () -> Unit,
+    onFailAndExplore: () -> Unit
 ) {
     Text(
         text = answer,
@@ -350,6 +366,17 @@ private fun ClozeCard(
                         Text("I Knew It")
                     }
                 }
+
+                Spacer(Modifier.height(8.dp))
+
+                TextButton(
+                    onClick = onFailAndExplore,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Explore, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text("I Don't Know — Explore")
+                }
             }
         }
     }
@@ -363,7 +390,8 @@ private fun ChoiceCard(
     selectedAnswer: String?,
     isCorrect: Boolean?,
     onSelect: (String) -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onExplore: () -> Unit
 ) {
     Text(
         text = french,
@@ -439,6 +467,19 @@ private fun ChoiceCard(
 
         Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
             Text("Next")
+        }
+
+        if (isCorrect == false) {
+            Spacer(Modifier.height(8.dp))
+
+            TextButton(
+                onClick = onExplore,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Explore, contentDescription = null)
+                Spacer(Modifier.width(4.dp))
+                Text("Explore")
+            }
         }
     }
 }

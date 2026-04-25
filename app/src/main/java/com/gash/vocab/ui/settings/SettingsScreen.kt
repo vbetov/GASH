@@ -225,6 +225,27 @@ fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm
                 onValueChange = { vm.setNewPerDay(it) }
             )
 
+            Spacer(Modifier.height(8.dp))
+
+            if (state.isUncappedToday) {
+                OutlinedButton(
+                    onClick = { vm.toggleUncapToday() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Uncapped for today — tap to restore limit")
+                }
+            } else {
+                TextButton(
+                    onClick = { vm.toggleUncapToday() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Uncap new cards for today")
+                }
+            }
+
             Spacer(Modifier.height(12.dp))
 
             SettingSlider(

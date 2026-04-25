@@ -41,6 +41,9 @@ captures/
 # Google Services (if used)
 google-services.json
 
+# Full vocabulary seed (keep only the GitHub shortlist in repo)
+app/src/main/assets/seed_vocab.json
+
 # OS files
 .DS_Store
 Thumbs.db
