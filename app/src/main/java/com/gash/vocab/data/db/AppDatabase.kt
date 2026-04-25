@@ -44,22 +44,30 @@ abstract class AppDatabase : RoomDatabase() {
             val dbFile = context.getDatabasePath(DB_NAME)
             if (!dbFile.exists()) return
 
-            val backupDir = File(context.getExternalFilesDir(null), "backup")
+            val baseDir = context.externalMediaDirs.firstOrNull()
+            if (baseDir == null || (!baseDir.exists() && !baseDir.mkdirs())) return
+
+            val backupDir = File(baseDir, "backup")
             if (!backupDir.exists()) backupDir.mkdirs()
+
             val backupFile = File(backupDir, DB_NAME)
 
             // Checkpoint WAL to ensure all data is in the main db file
-            INSTANCE?.let {
-                it.openHelper.writableDatabase.execSQL("PRAGMA wal_checkpoint(FULL)")
-            }
+            try {
+                INSTANCE?.let { db ->
+                    val cursor = db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)")
+                    cursor.moveToFirst()
+                    cursor.close()
+                }
+            } catch (_: Exception) { }
 
             dbFile.copyTo(backupFile, overwrite = true)
 
             // Also copy WAL and SHM if they exist
             val walFile = File(dbFile.path + "-wal")
             val shmFile = File(dbFile.path + "-shm")
-            if (walFile.exists()) walFile.copyTo(File(backupDir, "$DB_NAME-wal"), overwrite = true)
-            if (shmFile.exists()) shmFile.copyTo(File(backupDir, "$DB_NAME-shm"), overwrite = true)
+            if (walFile.exists()) walFile.copyTo(File(backupDir, "$DB_NAME-wal"), overwrite = true) else File(backupDir, "$DB_NAME-wal").delete()
+            if (shmFile.exists()) shmFile.copyTo(File(backupDir, "$DB_NAME-shm"), overwrite = true) else File(backupDir, "$DB_NAME-shm").delete()
         }
 
         /**

@@ -271,7 +271,7 @@ fun SettingsScreen(onShowStats: () -> Unit = {}, onCloseApp: () -> Unit = {}, vm
         SettingsCard("Import Database File") {
             Text(
                 text = "Replace the entire database with a .db file from your device. " +
-                        "A backup is automatically saved to Android/data/com.gash.vocab/files/backup/ whenever you close the app.",
+                        "A backup is automatically saved to Android/media/com.gash.vocab/backup/ whenever you close the app.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
