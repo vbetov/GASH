@@ -9,9 +9,9 @@ import java.time.ZoneId
  * SM-2 spaced repetition algorithm.
  *
  * Quality scores by interaction mode:
- *   check  = 4  (highest — user saw French, self-assessed "I knew it")
- *   cloze  = 3  (fill-in-the-blank correct)
- *   choice = 2  (multiple choice correct)
+ *   check  = 5  (highest — user saw French, self-assessed "I knew it"; only mode that clears the review hurdle)
+ *   cloze  = 2  (fill-in-the-blank correct — does not advance interval)
+ *   choice = 1  (multiple choice correct — treated as failure, interval resets)
  *   don't know = 0
  */
 object SM2 {
