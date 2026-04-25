@@ -78,9 +78,9 @@ object SM2 {
     fun qualityForMode(mode: String, correct: Boolean): Int {
         if (!correct) return 0
         return when (mode) {
-            "check" -> 4
-            "cloze" -> 3
-            "choice" -> 2
+            "check" -> 5
+            "cloze" -> 2
+            "choice" -> 1
             else -> 0
         }
     }

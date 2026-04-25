@@ -349,15 +349,6 @@ private fun ClozeCard(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    text = answer,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-
                 Spacer(Modifier.height(32.dp))
 
                 Row(
